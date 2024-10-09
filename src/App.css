@@ -1,0 +1,19 @@
+/* styles.css or similar */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+div#viewer-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh; /* Full viewport height */
+  overflow: auto; /* Allow scrolling if needed */
+}
+
+.rpv-core__inner-pages {
+  width: 100%; /* Allow it to fill the width */
+}
