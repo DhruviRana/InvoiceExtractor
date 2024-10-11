@@ -92,8 +92,36 @@ const CanvasPDFViewer = () => {
       width: 74.74249267578125,
       height: 7.350006103515625,
     },
+    {
+      key: "test1",
+      text: "",
+      page: 0,
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+    },
+    {
+      key: "test2",
+      text: "",
+      page: 0,
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+    },
+    {
+      key: "test3",
+      text: "",
+      page: 0,
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+    },
   ]);
   const [selectedText, setSelectedText] = useState("");
+  const [selectedKey, setSelectedKey] = useState("");
   const [selection, setSelection] = useState({
     startX: 0,
     startY: 0,
@@ -101,12 +129,6 @@ const CanvasPDFViewer = () => {
     endY: 0,
     isSelecting: false,
     pageIndex: 0,
-  });
-  const [hoverInfo, setHoverInfo] = useState({
-    isVisible: false,
-    x: 0,
-    y: 0,
-    key: "",
   });
   const [popup, setPopup] = useState({
     isVisible: false,
@@ -116,6 +138,7 @@ const CanvasPDFViewer = () => {
   });
   const [selectionOverlay, setSelectionOverlay] = useState(null); // For showing selection rectangle
   const [selectedHovered, setselectedHovered] = useState(null);
+  const [rowData, setRowData] = useState({ isVisible: false });
 
   useEffect(() => {
     const loadPDF = async () => {
@@ -283,8 +306,26 @@ const CanvasPDFViewer = () => {
         height: Math.abs(selection.endY - selection.startY) / scale,
       };
 
+      const splitedArr = text.split(":");
+      console.log(splitedArr);
+      if (splitedArr.length > 1) {
+        setSelectedKey(splitedArr[0]);
+        setSelectedText(splitedArr[1].trim());
+      } else {
+        setSelectedKey("");
+        setSelectedText(text.trim());
+      }
+
+      setRowData({
+        isVisible: true,
+        page: selection.pageIndex + 1,
+        x: Math.min(selection.startX, selection.endX),
+        y: Math.min(selection.startY, selection.endY),
+        height: Math.abs(selection.endY - selection.startY),
+      });
+
       setSelectedCoordinate((prev) => [...prev, scaledSelection]);
-      setSelectedText(text);
+      // setSelectedText(text);
     }
     setSelection({ ...selection, isSelecting: false });
     setSelectionOverlay(null);
@@ -333,6 +374,7 @@ const CanvasPDFViewer = () => {
       selectedCoordIndex: index,
     }); // Show popup on highlight click
   };
+
   const handleHover = (coord, index) => {
     setselectedHovered({
       isVisible: true,
@@ -357,6 +399,10 @@ const CanvasPDFViewer = () => {
     const adjustedY = coord.y * scale;
     const adjustedHeight = coord.height * scale;
     handleHover({ x: adjustedX, y: adjustedY, height: adjustedHeight }, index);
+  };
+
+  const handleChange = (selected) => {
+    setSelectedKey(selected);
   };
 
   return (
@@ -463,10 +509,46 @@ const CanvasPDFViewer = () => {
         </ul>
       </div>
 
-      <div>
-        <input placeholder="Key" />
-        <input placeholder="Value" />
-      </div>
+      {rowData && rowData.isVisible && (
+        <>
+          <div
+            style={{
+              position: "absolute",
+              left: rowData.x,
+              top: rowData.y + rowData.height,
+              backgroundColor: "red",
+              padding: "10px",
+              border: "1px solid black",
+              zIndex: 1000,
+            }}
+          >
+            <div>
+              <select id="dropdown" onChange={handleChange}>
+                <option value="" disabled>
+                  Select a key
+                </option>
+                {selectedCoordinate.map((item) => (
+                  <option key={item.key} value={item.key}>
+                    {item.key}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <input placeholder="Value" value={selectedText} />
+            <div>
+              <button value={"Confirm"}>Confirm</button>
+              <button
+                value={"Remove"}
+                onClick={() => {
+                  setRowData({ isVisible: false });
+                }}
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
