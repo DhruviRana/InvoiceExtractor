@@ -7,6 +7,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@3.11.174/
 
 const CanvasPDFViewer = () => {
   const canvasRef = useRef(null);
+  const [pdfFile, setPdfFile] = useState(null);
   const [pdfPages, setPdfPages] = useState([]); // Store all the PDF pages
   const [renderingTasks, setRenderingTasks] = useState({}); // Track rendering tasks by page
   const [scale] = useState(2); // PDF scale factor
@@ -140,9 +141,18 @@ const CanvasPDFViewer = () => {
   const [selectedHovered, setselectedHovered] = useState(null);
   const [rowData, setRowData] = useState({ isVisible: false });
 
+  const handlePdfUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file && file.type === "application/pdf") {
+        const fileUrl = URL.createObjectURL(file);
+        console.log("fileUrl : ",fileUrl)
+        setPdfFile(fileUrl)
+    }
+};
+
   useEffect(() => {
     const loadPDF = async () => {
-      const loadingTask = pdfjsLib.getDocument(pdfUrl);
+      const loadingTask = pdfjsLib.getDocument(pdfFile);
       const pdf = await loadingTask.promise;
       const pages = [];
       for (let i = 1; i <= pdf.numPages; i++) {
@@ -151,9 +161,10 @@ const CanvasPDFViewer = () => {
       }
       setPdfPages(pages); // Set all the pages into the state
     };
-
-    loadPDF();
-  }, []);
+    if(pdfFile){
+      loadPDF();
+    }
+  }, [pdfFile]);
 
   const renderPage = async (page, index) => {
     if (renderingTasks[index]) {
@@ -406,6 +417,9 @@ const CanvasPDFViewer = () => {
   };
 
   return (
+    <>
+    <input type="file" onChange={handlePdfUpload} accept="application/pdf" />
+    {pdfFile && 
     <div style={{ display: "flex" }}>
       <div>
         {pdfPages.map((page, index) => (
@@ -550,6 +564,8 @@ const CanvasPDFViewer = () => {
         </>
       )}
     </div>
+    }
+    </>
   );
 };
 
