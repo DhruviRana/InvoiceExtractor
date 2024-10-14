@@ -141,14 +141,16 @@ const CanvasPDFViewer = () => {
   const [selectedHovered, setselectedHovered] = useState(null);
   const [rowData, setRowData] = useState({ isVisible: false });
 
+  const [hoveredIndex, setHoveredIndex] = useState(null); // New state to track hovered index
+
   const handlePdfUpload = async (event) => {
     const file = event.target.files[0];
     if (file && file.type === "application/pdf") {
-        const fileUrl = URL.createObjectURL(file);
-        console.log("fileUrl : ",fileUrl)
-        setPdfFile(fileUrl)
+      const fileUrl = URL.createObjectURL(file);
+      console.log("fileUrl : ", fileUrl);
+      setPdfFile(fileUrl);
     }
-};
+  };
 
   useEffect(() => {
     const loadPDF = async () => {
@@ -161,7 +163,7 @@ const CanvasPDFViewer = () => {
       }
       setPdfPages(pages); // Set all the pages into the state
     };
-    if(pdfFile){
+    if (pdfFile) {
       loadPDF();
     }
   }, [pdfFile]);
@@ -207,7 +209,10 @@ const CanvasPDFViewer = () => {
         const adjustedWidth = coord.width * viewport.scale;
         const adjustedHeight = coord.height * viewport.scale;
 
-        context.strokeStyle = "rgba(255, 0, 0, 0.5)";
+        context.strokeStyle =
+          hoveredIndex === index
+            ? "rgba(0, 255, 0, 0.5)"
+            : "rgba(255, 0, 0, 0.5)";
         context.lineWidth = 2;
         context.strokeRect(adjustedX, adjustedY, adjustedWidth, adjustedHeight);
 
@@ -256,7 +261,7 @@ const CanvasPDFViewer = () => {
         renderPage(page, index);
       });
     }
-  }, [pdfPages, selectedCoordinate]);
+  }, [pdfPages, selectedCoordinate, hoveredIndex]);
 
   const handleMouseDown = (e, pageIndex) => {
     const canvas = document.getElementById(`pdf-canvas-${pageIndex}`);
@@ -394,6 +399,7 @@ const CanvasPDFViewer = () => {
       height: coord.height,
       selectedCoordIndex: index,
     });
+    setHoveredIndex(index); // Set hovered index on key hover
   };
 
   const handleDeleteHighlight = () => {
@@ -418,153 +424,158 @@ const CanvasPDFViewer = () => {
 
   return (
     <>
-    <input type="file" onChange={handlePdfUpload} accept="application/pdf" />
-    {pdfFile && 
-    <div style={{ display: "flex" }}>
-      <div>
-        {pdfPages.map((page, index) => (
-          <div
-            key={index}
-            style={{
-              position: "relative",
-            }}
-          >
-            <canvas
-              id={`pdf-canvas-${index}`}
-              ref={index === 0 ? canvasRef : null}
-              onMouseDown={(e) => handleMouseDown(e, index)}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-            ></canvas>
-
-            {selectionOverlay &&
-              selection.isSelecting &&
-              selection.pageIndex === index && (
-                <div
-                  style={{
-                    position: "absolute",
-                    left: selectionOverlay.left,
-                    top: selectionOverlay.top,
-                    width: selectionOverlay.width,
-                    height: selectionOverlay.height,
-                    border: "2px dashed gray",
-                    pointerEvents: "none",
-                    cursor: "move",
-                    animation: "dash-animation 2s linear infinite", // Add animation here
-                  }}
-                ></div>
-              )}
-          </div>
-        ))}
-
-        {popup.isVisible && (
-          <div
-            style={{
-              position: "absolute",
-              left: popup.x,
-              top: popup.y + popup.height,
-              backgroundColor: "white",
-              padding: "10px",
-              border: "1px solid black",
-              zIndex: 1000,
-            }}
-          >
-            <div>Key: {selectedCoordinate[popup.selectedCoordIndex]?.key}</div>
-            <div>
-              Text: {selectedCoordinate[popup.selectedCoordIndex]?.text}
-            </div>
-            <button onClick={handleDeleteHighlight}>Delete Highlight</button>
-          </div>
-        )}
-        {selectedHovered && selectedHovered?.isVisible && (
-          <div
-            style={{
-              position: "absolute",
-              left: selectedHovered.x,
-              top: selectedHovered.y + selectedHovered.height,
-              backgroundColor: "white",
-              padding: "10px",
-              border: "1px solid black",
-              zIndex: 1000,
-            }}
-          >
-            <div>
-              {selectedCoordinate[selectedHovered.selectedCoordIndex]?.key}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div
-        style={{
-          width: "300px",
-          marginLeft: "20px",
-          paddingLeft: "10px",
-          borderLeft: "1px solid black",
-          position: "sticky",
-          top: "0", // Sticks to the top of the viewport when scrolling
-          height: "100vh",
-          overflowY: "auto",
-        }}
-      >
-        <h3>Selected Key-Value Pairs</h3>
-        <ul>
-          {selectedCoordinate.map((coord, index) => (
-            <li
-              key={index}
-              onMouseEnter={(e) => {
-                handleOnKeyHove(coord, index);
-              }}
-              style={{ cursor: "pointer" }}
-            >
-              <strong>{coord.key}:</strong> {coord.text}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {rowData && rowData.isVisible && (
-        <>
-          <div
-            style={{
-              position: "absolute",
-              left: rowData.x,
-              top: rowData.y + rowData.height,
-              backgroundColor: "red",
-              padding: "10px",
-              border: "1px solid black",
-              zIndex: 1000,
-            }}
-          >
-            <div>
-              <select id="dropdown" onChange={handleChange}>
-                <option value="" disabled>
-                  Select a key
-                </option>
-                {selectedCoordinate.map((item) => (
-                  <option key={item.key} value={item.key}>
-                    {item.key}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <input placeholder="Value" value={selectedText} />
-            <div>
-              <button value={"Confirm"}>Confirm</button>
-              <button
-                value={"Remove"}
-                onClick={() => {
-                  setRowData({ isVisible: false });
+      <input type="file" onChange={handlePdfUpload} accept="application/pdf" />
+      {pdfFile && (
+        <div style={{ display: "flex" }}>
+          <div>
+            {pdfPages.map((page, index) => (
+              <div
+                key={index}
+                style={{
+                  position: "relative",
                 }}
               >
-                Remove
-              </button>
-            </div>
+                <canvas
+                  id={`pdf-canvas-${index}`}
+                  ref={index === 0 ? canvasRef : null}
+                  onMouseDown={(e) => handleMouseDown(e, index)}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                ></canvas>
+
+                {selectionOverlay &&
+                  selection.isSelecting &&
+                  selection.pageIndex === index && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: selectionOverlay.left,
+                        top: selectionOverlay.top,
+                        width: selectionOverlay.width,
+                        height: selectionOverlay.height,
+                        border: "2px dashed gray",
+                        pointerEvents: "none",
+                        cursor: "move",
+                        animation: "dash-animation 2s linear infinite", // Add animation here
+                      }}
+                    ></div>
+                  )}
+              </div>
+            ))}
+
+            {popup.isVisible && (
+              <div
+                style={{
+                  position: "absolute",
+                  left: popup.x,
+                  top: popup.y + popup.height,
+                  backgroundColor: "white",
+                  padding: "10px",
+                  border: "1px solid black",
+                  zIndex: 1000,
+                }}
+              >
+                <div>
+                  Key: {selectedCoordinate[popup.selectedCoordIndex]?.key}
+                </div>
+                <div>
+                  Text: {selectedCoordinate[popup.selectedCoordIndex]?.text}
+                </div>
+                <button onClick={handleDeleteHighlight}>
+                  Delete Highlight
+                </button>
+              </div>
+            )}
+            {selectedHovered && selectedHovered?.isVisible && (
+              <div
+                style={{
+                  position: "absolute",
+                  left: selectedHovered.x,
+                  top: selectedHovered.y + selectedHovered.height,
+                  backgroundColor: "white",
+                  padding: "10px",
+                  border: "1px solid black",
+                  zIndex: 1000,
+                }}
+              >
+                <div>
+                  {selectedCoordinate[selectedHovered.selectedCoordIndex]?.key}
+                </div>
+              </div>
+            )}
           </div>
-        </>
+
+          <div
+            style={{
+              width: "300px",
+              marginLeft: "20px",
+              paddingLeft: "10px",
+              borderLeft: "1px solid black",
+              position: "sticky",
+              top: "0", // Sticks to the top of the viewport when scrolling
+              height: "100vh",
+              overflowY: "auto",
+            }}
+          >
+            <h3>Selected Key-Value Pairs</h3>
+            <ul>
+              {selectedCoordinate.map((coord, index) => (
+                <li
+                  key={index}
+                  onMouseEnter={(e) => {
+                    handleOnKeyHove(coord, index);
+                  }}
+                  onMouseLeave={() => setHoveredIndex(null)} // Reset on hover leave
+                  style={{ cursor: "pointer" }}
+                >
+                  <strong>{coord.key}:</strong> {coord.text}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {rowData && rowData.isVisible && (
+            <>
+              <div
+                style={{
+                  position: "absolute",
+                  left: rowData.x,
+                  top: rowData.y + rowData.height,
+                  backgroundColor: "red",
+                  padding: "10px",
+                  border: "1px solid black",
+                  zIndex: 1000,
+                }}
+              >
+                <div>
+                  <select id="dropdown" onChange={handleChange}>
+                    <option value="" disabled>
+                      Select a key
+                    </option>
+                    {selectedCoordinate.map((item) => (
+                      <option key={item.key} value={item.key}>
+                        {item.key}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <input placeholder="Value" value={selectedText} />
+                <div>
+                  <button value={"Confirm"}>Confirm</button>
+                  <button
+                    value={"Remove"}
+                    onClick={() => {
+                      setRowData({ isVisible: false });
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       )}
-    </div>
-    }
     </>
   );
 };
