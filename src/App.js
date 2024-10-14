@@ -7,6 +7,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@3.11.174/
 
 const CanvasPDFViewer = () => {
   const canvasRef = useRef(null);
+  const [pdfFile, setPdfFile] = useState(null);
+
   const [pdfPages, setPdfPages] = useState([]); // Store all the PDF pages
   const [renderingTasks, setRenderingTasks] = useState({}); // Track rendering tasks by page
   const [scale] = useState(2); // PDF scale factor
@@ -19,6 +21,7 @@ const CanvasPDFViewer = () => {
       y: 125.14999389648438,
       width: 43.909637451171875,
       height: 9.0,
+      isConfirm: "N",
     },
     {
       key: "CIN NO",
@@ -28,6 +31,7 @@ const CanvasPDFViewer = () => {
       y: 137.19998168945312,
       width: 93.8265380859375,
       height: 9.0,
+      isConfirm: "N",
     },
     {
       key: "invoice_number",
@@ -37,6 +41,7 @@ const CanvasPDFViewer = () => {
       y: 155.14999389648438,
       width: 41.0655517578125,
       height: 9.0,
+      isConfirm: "N",
     },
     {
       key: "invoice_date",
@@ -46,6 +51,7 @@ const CanvasPDFViewer = () => {
       y: 155.14999389648438,
       width: 44.242431640625,
       height: 9.0,
+      isConfirm: "N",
     },
     {
       key: "Party P.O. Ref",
@@ -55,6 +61,7 @@ const CanvasPDFViewer = () => {
       y: 167.14999389648438,
       width: 33.99757385253906,
       height: 9.0,
+      isConfirm: "N",
     },
     {
       key: "product_1_name",
@@ -64,6 +71,7 @@ const CanvasPDFViewer = () => {
       y: 404.08746337890625,
       width: 99.67637634277344,
       height: 7.350006103515625,
+      isConfirm: "N",
     },
     {
       key: "product_2_name",
@@ -73,6 +81,7 @@ const CanvasPDFViewer = () => {
       y: 420.08746337890625,
       width: 74.74249267578125,
       height: 7.350006103515625,
+      isConfirm: "N",
     },
     {
       key: "product_3_name",
@@ -82,6 +91,7 @@ const CanvasPDFViewer = () => {
       y: 436.08746337890625,
       width: 74.74249267578125,
       height: 7.350006103515625,
+      isConfirm: "N",
     },
     {
       key: "product_4_name",
@@ -91,6 +101,7 @@ const CanvasPDFViewer = () => {
       y: 452.08746337890625,
       width: 74.74249267578125,
       height: 7.350006103515625,
+      isConfirm: "N",
     },
     {
       key: "test1",
@@ -100,6 +111,7 @@ const CanvasPDFViewer = () => {
       y: 0,
       width: 0,
       height: 0,
+      isConfirm: "N",
     },
     {
       key: "test2",
@@ -109,6 +121,7 @@ const CanvasPDFViewer = () => {
       y: 0,
       width: 0,
       height: 0,
+      isConfirm: "N",
     },
     {
       key: "test3",
@@ -118,6 +131,7 @@ const CanvasPDFViewer = () => {
       y: 0,
       width: 0,
       height: 0,
+      isConfirm: "N",
     },
   ]);
   const [selectedText, setSelectedText] = useState("");
@@ -139,10 +153,11 @@ const CanvasPDFViewer = () => {
   const [selectionOverlay, setSelectionOverlay] = useState(null); // For showing selection rectangle
   const [selectedHovered, setselectedHovered] = useState(null);
   const [rowData, setRowData] = useState({ isVisible: false });
+  const [hoveredIndex, setHoveredIndex] = useState(null); // New state to track hovered index
 
   useEffect(() => {
     const loadPDF = async () => {
-      const loadingTask = pdfjsLib.getDocument(pdfUrl);
+      const loadingTask = pdfjsLib.getDocument(pdfFile);
       const pdf = await loadingTask.promise;
       const pages = [];
       for (let i = 1; i <= pdf.numPages; i++) {
@@ -151,9 +166,10 @@ const CanvasPDFViewer = () => {
       }
       setPdfPages(pages); // Set all the pages into the state
     };
-
-    loadPDF();
-  }, []);
+    if (pdfFile) {
+      loadPDF();
+    }
+  }, [pdfFile]);
 
   const renderPage = async (page, index) => {
     if (renderingTasks[index]) {
@@ -198,6 +214,12 @@ const CanvasPDFViewer = () => {
 
         context.strokeStyle = "rgba(255, 0, 0, 0.5)";
         context.lineWidth = 2;
+        if (coord.isConfirm != "P") {
+          context.strokeStyle =
+            hoveredIndex === index
+              ? "rgba(0, 255, 0, 0.5)"
+              : "rgba(255, 0, 0, 0.5)";
+        }
         context.strokeRect(adjustedX, adjustedY, adjustedWidth, adjustedHeight);
 
         canvasRef.current.addEventListener("click", (event) => {
@@ -235,6 +257,9 @@ const CanvasPDFViewer = () => {
             );
           }
         });
+        canvasRef.current.addEventListener("mouseleave", (event) => {
+          console.log("here");
+        });
       }
     });
   };
@@ -245,7 +270,7 @@ const CanvasPDFViewer = () => {
         renderPage(page, index);
       });
     }
-  }, [pdfPages, selectedCoordinate]);
+  }, [pdfPages, selectedCoordinate, hoveredIndex]);
 
   const handleMouseDown = (e, pageIndex) => {
     const canvas = document.getElementById(`pdf-canvas-${pageIndex}`);
@@ -304,6 +329,7 @@ const CanvasPDFViewer = () => {
         y: Math.min(selection.startY, selection.endY) / scale,
         width: Math.abs(selection.endX - selection.startX) / scale,
         height: Math.abs(selection.endY - selection.startY) / scale,
+        isConfirm: "P",
       };
 
       const splitedArr = text.split(":");
@@ -322,6 +348,7 @@ const CanvasPDFViewer = () => {
         x: Math.min(selection.startX, selection.endX),
         y: Math.min(selection.startY, selection.endY),
         height: Math.abs(selection.endY - selection.startY),
+        index: selectedCoordinate.length,
       });
 
       setSelectedCoordinate((prev) => [...prev, scaledSelection]);
@@ -376,6 +403,7 @@ const CanvasPDFViewer = () => {
   };
 
   const handleHover = (coord, index) => {
+    setHoveredIndex(index);
     setselectedHovered({
       isVisible: true,
       x: coord.x,
@@ -383,6 +411,10 @@ const CanvasPDFViewer = () => {
       height: coord.height,
       selectedCoordIndex: index,
     });
+  };
+  const handleHoverLeave = () => {
+    setHoveredIndex(null);
+    setselectedHovered(null);
   };
 
   const handleDeleteHighlight = () => {
@@ -402,99 +434,164 @@ const CanvasPDFViewer = () => {
   };
 
   const handleChange = (selected) => {
-    setSelectedKey(selected);
+    console.log(selected);
+    const value = selected.target.value;
+    console.log("Selected value:", value);
+    setSelectedKey(value);
+  };
+
+  const handlePdfUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file && file.type === "application/pdf") {
+      const fileUrl = URL.createObjectURL(file);
+      console.log("fileUrl : ", fileUrl);
+      setPdfFile(fileUrl);
+    }
   };
 
   return (
-    <div style={{ display: "flex" }}>
-      <div>
-        {pdfPages.map((page, index) => (
+    <>
+      {pdfFile && (
+        <div style={{ display: "flex", flexWrap: "wrap" }}>
+          <div style={{ flex: "0 0 50%", backgroundColor: "#f0f0f0" }}>
+            {pdfPages.map((page, index) => (
+              <div
+                key={index}
+                style={{
+                  position: "relative",
+                }}
+              >
+                <canvas
+                  id={`pdf-canvas-${index}`}
+                  ref={index === 0 ? canvasRef : null}
+                  onMouseDown={(e) => handleMouseDown(e, index)}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                ></canvas>
+
+                {selectionOverlay &&
+                  selection.isSelecting &&
+                  selection.pageIndex === index && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: selectionOverlay.left,
+                        top: selectionOverlay.top,
+                        width: selectionOverlay.width,
+                        height: selectionOverlay.height,
+                        border: "2px dashed gray",
+                        pointerEvents: "none",
+                        cursor: "move",
+                        animation: "dash-animation 2s linear infinite", // Add animation here
+                      }}
+                    ></div>
+                  )}
+              </div>
+            ))}
+
+            {popup.isVisible && (
+              <div
+                style={{
+                  position: "absolute",
+                  left: popup.x,
+                  top: popup.y + popup.height,
+                  backgroundColor: "white",
+                  padding: "10px",
+                  border: "1px solid black",
+                  zIndex: 1000,
+                }}
+              >
+                <div>
+                  Key: {selectedCoordinate[popup.selectedCoordIndex]?.key}
+                </div>
+                <div>
+                  Text: {selectedCoordinate[popup.selectedCoordIndex]?.text}
+                </div>
+                <button onClick={handleDeleteHighlight}>
+                  Delete Highlight
+                </button>
+              </div>
+            )}
+            {selectedHovered && selectedHovered?.isVisible && (
+              <div
+                style={{
+                  position: "absolute",
+                  left: selectedHovered.x,
+                  top: selectedHovered.y + selectedHovered.height,
+                  backgroundColor: "white",
+                  padding: "10px",
+                  border: "1px solid black",
+                  zIndex: 1000,
+                }}
+              >
+                <div>
+                  {selectedCoordinate[selectedHovered.selectedCoordIndex]?.key}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div
-            key={index}
             style={{
-              position: "relative",
+              flex: "0 0 30%",
+              marginLeft: "20px",
+              paddingLeft: "10px",
+              borderLeft: "1px solid black",
+              position: "sticky",
+              top: "0",
+              height: "100vh",
+              overflowY: "auto",
             }}
           >
-            <canvas
-              id={`pdf-canvas-${index}`}
-              ref={index === 0 ? canvasRef : null}
-              onMouseDown={(e) => handleMouseDown(e, index)}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-            ></canvas>
+            <h3>Selected Key-Value Pairs</h3>
+            {selectedCoordinate.map((coord, index) => {
+              return (
+                <>
+                  {coord.isConfirm != "P" && (
+                    <>
+                      <div
+                        key={index}
+                        style={{
+                          display: "flex",
+                          justifyContent: "flex-start",
+                          flexDirection: "row",
+                          gap: "20px",
+                          padding: "10px 0",
+                          borderBottom: "1px solid #ddd",
+                          cursor: "pointer",
+                        }}
+                        onMouseEnter={(e) => {
+                          handleOnKeyHove(coord, index);
+                        }}
+                        onMouseLeave={() => handleHoverLeave()} // Reset on hover leave
+                      >
+                        {/* Left align key */}
+                        <div
+                          style={{
+                            width: "200px",
+                            fontWeight: "bold",
+                            textAlign: "left",
+                          }}
+                        >
+                          {coord.key}
+                        </div>
 
-            {selectionOverlay &&
-              selection.isSelecting &&
-              selection.pageIndex === index && (
-                <div
-                  style={{
-                    position: "absolute",
-                    left: selectionOverlay.left,
-                    top: selectionOverlay.top,
-                    width: selectionOverlay.width,
-                    height: selectionOverlay.height,
-                    border: "2px dashed gray",
-                    pointerEvents: "none",
-                    cursor: "move",
-                    animation: "dash-animation 2s linear infinite", // Add animation here
-                  }}
-                ></div>
-              )}
-          </div>
-        ))}
-
-        {popup.isVisible && (
-          <div
-            style={{
-              position: "absolute",
-              left: popup.x,
-              top: popup.y + popup.height,
-              backgroundColor: "white",
-              padding: "10px",
-              border: "1px solid black",
-              zIndex: 1000,
-            }}
-          >
-            <div>Key: {selectedCoordinate[popup.selectedCoordIndex]?.key}</div>
-            <div>
-              Text: {selectedCoordinate[popup.selectedCoordIndex]?.text}
-            </div>
-            <button onClick={handleDeleteHighlight}>Delete Highlight</button>
-          </div>
-        )}
-        {selectedHovered && selectedHovered?.isVisible && (
-          <div
-            style={{
-              position: "absolute",
-              left: selectedHovered.x,
-              top: selectedHovered.y + selectedHovered.height,
-              backgroundColor: "white",
-              padding: "10px",
-              border: "1px solid black",
-              zIndex: 1000,
-            }}
-          >
-            <div>
-              {selectedCoordinate[selectedHovered.selectedCoordIndex]?.key}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div
-        style={{
-          width: "300px",
-          marginLeft: "20px",
-          paddingLeft: "10px",
-          borderLeft: "1px solid black",
-          position: "sticky",
-          top: "0", // Sticks to the top of the viewport when scrolling
-          height: "100vh",
-          overflowY: "auto",
-        }}
-      >
-        <h3>Selected Key-Value Pairs</h3>
-        <ul>
+                        {/* Left align value */}
+                        <div
+                          style={{
+                            textAlign: "left",
+                            // color: isKeyMatched ? "red" : "black",
+                          }}
+                        >
+                          {coord.text}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </>
+              );
+            })}
+            {/* <ul>
           {selectedCoordinate.map((coord, index) => (
             <li
               key={index}
@@ -506,50 +603,80 @@ const CanvasPDFViewer = () => {
               <strong>{coord.key}:</strong> {coord.text}
             </li>
           ))}
-        </ul>
-      </div>
+        </ul> */}
+          </div>
 
-      {rowData && rowData.isVisible && (
-        <>
-          <div
-            style={{
-              position: "absolute",
-              left: rowData.x,
-              top: rowData.y + rowData.height,
-              backgroundColor: "red",
-              padding: "10px",
-              border: "1px solid black",
-              zIndex: 1000,
-            }}
-          >
-            <div>
-              <select id="dropdown" onChange={handleChange}>
-                <option value="" disabled>
-                  Select a key
-                </option>
-                {selectedCoordinate.map((item) => (
-                  <option key={item.key} value={item.key}>
-                    {item.key}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <input placeholder="Value" value={selectedText} />
-            <div>
-              <button value={"Confirm"}>Confirm</button>
-              <button
-                value={"Remove"}
-                onClick={() => {
-                  setRowData({ isVisible: false });
+          {rowData && rowData.isVisible && (
+            <>
+              <div
+                style={{
+                  position: "absolute",
+                  left: rowData.x,
+                  top: rowData.y + rowData.height,
+                  backgroundColor: "red",
+                  padding: "10px",
+                  border: "1px solid black",
+                  zIndex: 1000,
                 }}
               >
-                Remove
-              </button>
-            </div>
-          </div>
-        </>
+                <div>
+                  <select
+                    id="dropdown"
+                    value={selectedKey}
+                    onChange={handleChange}
+                  >
+                    <option value="" disabled>
+                      Select a key
+                    </option>
+                    {selectedCoordinate.map((item) => (
+                      <option key={item.key} value={item.key}>
+                        {item.key}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <input placeholder="Value" value={selectedText} />
+                <div>
+                  <button
+                    value={"Confirm"}
+                    onClick={() => {
+                      const updatedCoordinates = selectedCoordinate.map(
+                        (coordinate, i) => {
+                          if (coordinate.key == selectedKey) {
+                            return {
+                              ...coordinate,
+                              isConfirm: "Y",
+                              key: selectedKey,
+                            };
+                          }
+                          return coordinate;
+                        }
+                      );
+
+                      // Set the updated coordinates in state
+                      setSelectedCoordinate(updatedCoordinates);
+                      setRowData({ isVisible: false });
+                      console.log(rowData.x);
+                    }}
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    value={"Remove"}
+                    onClick={() => {
+                      setRowData({ isVisible: false });
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       )}
-    </div>
+      <input type="file" onChange={handlePdfUpload} accept="application/pdf" />
+    </>
   );
 };
 
