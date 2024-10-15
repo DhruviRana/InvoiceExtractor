@@ -9,6 +9,8 @@ const CanvasPDFViewer = () => {
   const canvasRef = useRef(null);
   const [pdfFile, setPdfFile] = useState(null);
 
+  const [isHovered, setIsHovered] = useState(null);
+
   const [pdfPages, setPdfPages] = useState([]); // Store all the PDF pages
   const [renderingTasks, setRenderingTasks] = useState({}); // Track rendering tasks by page
   const [scale] = useState(2); // PDF scale factor
@@ -21,7 +23,15 @@ const CanvasPDFViewer = () => {
       y: 125.14999389648438,
       width: 43.909637451171875,
       height: 9.0,
-      isConfirm: "N",
+    },
+    {
+      key: "PAN Number",
+      text: "AAYCS6904J",
+      page: 1,
+      x: 111.12600708007812,
+      y: 113.14998626708984,
+      width: 44.73951721191406,
+      height: 9.0,
     },
     {
       key: "CIN NO",
@@ -31,7 +41,6 @@ const CanvasPDFViewer = () => {
       y: 137.19998168945312,
       width: 93.8265380859375,
       height: 9.0,
-      isConfirm: "N",
     },
     {
       key: "invoice_number",
@@ -41,7 +50,6 @@ const CanvasPDFViewer = () => {
       y: 155.14999389648438,
       width: 41.0655517578125,
       height: 9.0,
-      isConfirm: "N",
     },
     {
       key: "invoice_date",
@@ -51,7 +59,15 @@ const CanvasPDFViewer = () => {
       y: 155.14999389648438,
       width: 44.242431640625,
       height: 9.0,
-      isConfirm: "N",
+    },
+    {
+      key: "invoice_date",
+      text: "31/03/2024",
+      page: 1,
+      x: 432.0,
+      y: 167.14999389648438,
+      width: 43.450439453125,
+      height: 9.0,
     },
     {
       key: "Party P.O. Ref",
@@ -61,77 +77,411 @@ const CanvasPDFViewer = () => {
       y: 167.14999389648438,
       width: 33.99757385253906,
       height: 9.0,
-      isConfirm: "N",
     },
     {
-      key: "product_1_name",
+      key: "Party P.O. Ref",
+      text: "AMAZON",
+      page: 1,
+      x: 24.0,
+      y: 198.64999389648438,
+      width: 30.308589935302734,
+      height: 9.0,
+    },
+    {
+      key: "Party P.O. Ref",
+      text: "AMAZON",
+      page: 1,
+      x: 312.0,
+      y: 198.64999389648438,
+      width: 30.30859375,
+      height: 9.0,
+    },
+    {
+      key: "Date",
+      text: "31/03/2024",
+      page: 1,
+      x: 252.0,
+      y: 155.14999389648438,
+      width: 44.242431640625,
+      height: 9.0,
+    },
+    {
+      key: "Date",
+      text: "31/03/2024",
+      page: 1,
+      x: 432.0,
+      y: 167.14999389648438,
+      width: 43.450439453125,
+      height: 9.0,
+    },
+    {
+      key: "Date of Supply",
+      text: "31/03/2024",
+      page: 1,
+      x: 252.0,
+      y: 155.14999389648438,
+      width: 44.242431640625,
+      height: 9.0,
+    },
+    {
+      key: "Date of Supply",
+      text: "31/03/2024",
+      page: 1,
+      x: 432.0,
+      y: 167.14999389648438,
+      width: 43.450439453125,
+      height: 9.0,
+    },
+    {
+      key: "table_1_product_name",
       text: "SHISH WATER TANK COVER 1000L",
       page: 1,
       x: 38.0,
       y: 404.08746337890625,
       width: 99.67637634277344,
       height: 7.350006103515625,
-      isConfirm: "N",
     },
     {
-      key: "product_2_name",
+      key: "table_1_product_code",
+      text: "FGWC0001",
+      page: 1,
+      x: 186.74998474121094,
+      y: 404.83746337890625,
+      width: 33.16937255859375,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_1_hsn_code",
+      text: "39202090",
+      page: 1,
+      x: 232.4499969482422,
+      y: 404.08746337890625,
+      width: 29.810440063476562,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_1_hsn_code",
+      text: "39202090",
+      page: 1,
+      x: 232.4500274658203,
+      y: 468.08746337890625,
+      width: 29.810440063476562,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_1_qty",
+      text: "1.000",
+      page: 1,
+      x: 282.06109619140625,
+      y: 404.08746337890625,
+      width: 16.75677490234375,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_1_uom",
+      text: "NOS",
+      page: 1,
+      x: 318.5,
+      y: 404.08746337890625,
+      width: 12.990936279296875,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_1_uom",
+      text: "NOS",
+      page: 1,
+      x: 318.4999694824219,
+      y: 420.08746337890625,
+      width: 12.990936279296875,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_1_uom",
+      text: "NOS",
+      page: 1,
+      x: 318.4999694824219,
+      y: 436.08746337890625,
+      width: 12.990936279296875,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_1_uom",
+      text: "NOS",
+      page: 1,
+      x: 318.5,
+      y: 452.08746337890625,
+      width: 12.990936279296875,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_1_discount",
+      text: "0.00",
+      page: 1,
+      x: 449.5111083984375,
+      y: 404.08746337890625,
+      width: 13.03033447265625,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_1_discount",
+      text: "0.00",
+      page: 1,
+      x: 449.5110778808594,
+      y: 420.08746337890625,
+      width: 13.03033447265625,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_1_discount",
+      text: "0.00",
+      page: 1,
+      x: 449.5110778808594,
+      y: 436.08746337890625,
+      width: 13.03033447265625,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_1_discount",
+      text: "0.00",
+      page: 1,
+      x: 283.9375305175781,
+      y: 452.08746337890625,
+      width: 13.03033447265625,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_1_discount",
+      text: "0.00",
+      page: 1,
+      x: 449.5110778808594,
+      y: 452.08746337890625,
+      width: 13.03033447265625,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_1_discount",
+      text: "0.00",
+      page: 1,
+      x: 449.5111389160156,
+      y: 468.08746337890625,
+      width: 13.03033447265625,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_1_discount",
+      text: "0.00",
+      page: 1,
+      x: 449.961181640625,
+      y: 490.83746337890625,
+      width: 13.140594482421875,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_product_name",
       text: "GROW BAG 24 X 24 INCH",
       page: 1,
       x: 37.999969482421875,
       y: 420.08746337890625,
       width: 74.74249267578125,
       height: 7.350006103515625,
-      isConfirm: "N",
     },
     {
-      key: "product_3_name",
-      text: "GROW BAG 15 X 15 INCH",
+      key: "table_2_hsn_code",
+      text: "39269099",
       page: 1,
-      x: 37.999969482421875,
+      x: 232.44996643066406,
+      y: 420.08746337890625,
+      width: 29.810440063476562,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_hsn_code",
+      text: "39269099",
+      page: 1,
+      x: 232.44996643066406,
       y: 436.08746337890625,
-      width: 74.74249267578125,
+      width: 29.810440063476562,
       height: 7.350006103515625,
-      isConfirm: "N",
     },
     {
-      key: "product_4_name",
-      text: "GROW BAG 15 X 15 INCH",
+      key: "table_2_hsn_code",
+      text: "39269099",
       page: 1,
-      x: 37.999969482421875,
+      x: 232.44998168945312,
       y: 452.08746337890625,
-      width: 74.74249267578125,
+      width: 29.8104248046875,
       height: 7.350006103515625,
-      isConfirm: "N",
     },
     {
-      key: "test1",
-      text: "",
-      page: 0,
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
-      isConfirm: "N",
+      key: "table_2_qty",
+      text: "5.000",
+      page: 1,
+      x: 282.0610656738281,
+      y: 420.08746337890625,
+      width: 16.75677490234375,
+      height: 7.350006103515625,
     },
     {
-      key: "test2",
-      text: "",
-      page: 0,
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
-      isConfirm: "N",
+      key: "table_2_qty",
+      text: "5.000",
+      page: 1,
+      x: 282.0610656738281,
+      y: 436.08746337890625,
+      width: 16.75677490234375,
+      height: 7.350006103515625,
     },
     {
-      key: "test3",
-      text: "",
-      page: 0,
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
-      isConfirm: "N",
+      key: "table_2_uom",
+      text: "NOS",
+      page: 1,
+      x: 318.5,
+      y: 404.08746337890625,
+      width: 12.990936279296875,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_uom",
+      text: "NOS",
+      page: 1,
+      x: 318.4999694824219,
+      y: 420.08746337890625,
+      width: 12.990936279296875,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_uom",
+      text: "NOS",
+      page: 1,
+      x: 318.4999694824219,
+      y: 436.08746337890625,
+      width: 12.990936279296875,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_uom",
+      text: "NOS",
+      page: 1,
+      x: 318.5,
+      y: 452.08746337890625,
+      width: 12.990936279296875,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_rate",
+      text: "152.37",
+      page: 1,
+      x: 349.0110778808594,
+      y: 420.08746337890625,
+      width: 20.48321533203125,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_amount",
+      text: "761.85",
+      page: 1,
+      x: 403.2276916503906,
+      y: 420.08746337890625,
+      width: 20.48321533203125,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_amount",
+      text: "761.85",
+      page: 1,
+      x: 498.9776916503906,
+      y: 420.08746337890625,
+      width: 20.483184814453125,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_discount",
+      text: "0.00",
+      page: 1,
+      x: 449.5111083984375,
+      y: 404.08746337890625,
+      width: 13.03033447265625,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_discount",
+      text: "0.00",
+      page: 1,
+      x: 449.5110778808594,
+      y: 420.08746337890625,
+      width: 13.03033447265625,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_discount",
+      text: "0.00",
+      page: 1,
+      x: 449.5110778808594,
+      y: 436.08746337890625,
+      width: 13.03033447265625,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_discount",
+      text: "0.00",
+      page: 1,
+      x: 283.9375305175781,
+      y: 452.08746337890625,
+      width: 13.03033447265625,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_discount",
+      text: "0.00",
+      page: 1,
+      x: 449.5110778808594,
+      y: 452.08746337890625,
+      width: 13.03033447265625,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_discount",
+      text: "0.00",
+      page: 1,
+      x: 449.5111389160156,
+      y: 468.08746337890625,
+      width: 13.03033447265625,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_discount",
+      text: "0.00",
+      page: 1,
+      x: 449.961181640625,
+      y: 490.83746337890625,
+      width: 13.140594482421875,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_taxable_value",
+      text: "761.85",
+      page: 1,
+      x: 403.2276916503906,
+      y: 420.08746337890625,
+      width: 20.48321533203125,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_taxable_value",
+      text: "761.85",
+      page: 1,
+      x: 498.9776916503906,
+      y: 420.08746337890625,
+      width: 20.483184814453125,
+      height: 7.350006103515625,
+    },
+    {
+      key: "table_2_value",
+      text: "898.98",
+      page: 1,
+      x: 558.427490234375,
+      y: 420.08746337890625,
+      width: 20.483154296875,
+      height: 7.350006103515625,
     },
   ]);
   const [selectedText, setSelectedText] = useState("");
@@ -217,8 +567,11 @@ const CanvasPDFViewer = () => {
         if (coord.isConfirm != "P") {
           context.strokeStyle =
             hoveredIndex === index
-              ? "rgba(0, 255, 0, 0.5)"
+              ? "rgba(0, 0, 255, 0.5)"
               : "rgba(255, 0, 0, 0.5)";
+        }
+        if (coord.isConfirm == "Y") {
+          context.strokeStyle = "rgba(0, 255, 0, 0.5)";
         }
         context.strokeRect(adjustedX, adjustedY, adjustedWidth, adjustedHeight);
 
@@ -256,9 +609,6 @@ const CanvasPDFViewer = () => {
               index
             );
           }
-        });
-        canvasRef.current.addEventListener("mouseleave", (event) => {
-          console.log("here");
         });
       }
     });
@@ -332,15 +682,16 @@ const CanvasPDFViewer = () => {
         isConfirm: "P",
       };
 
-      const splitedArr = text.split(":");
-      console.log(splitedArr);
-      if (splitedArr.length > 1) {
-        setSelectedKey(splitedArr[0]);
-        setSelectedText(splitedArr[1].trim());
-      } else {
-        setSelectedKey("");
-        setSelectedText(text.trim());
-      }
+      setSelectedText(text.trim());
+      // const splitedArr = text.split(":");
+      // console.log(splitedArr);
+      // if (splitedArr.length > 1) {
+      //   // setSelectedKey(splitedArr[0]);
+      //   setSelectedText(splitedArr[1].trim());
+      // } else {
+      //   // setSelectedKey("");
+      //   setSelectedText(text.trim());
+      // }
 
       setRowData({
         isVisible: true,
@@ -348,6 +699,7 @@ const CanvasPDFViewer = () => {
         x: Math.min(selection.startX, selection.endX),
         y: Math.min(selection.startY, selection.endY),
         height: Math.abs(selection.endY - selection.startY),
+        width: Math.abs(selection.endX - selection.startX),
         index: selectedCoordinate.length,
       });
 
@@ -413,6 +765,7 @@ const CanvasPDFViewer = () => {
     });
   };
   const handleHoverLeave = () => {
+    setIsHovered(null);
     setHoveredIndex(null);
     setselectedHovered(null);
   };
@@ -427,6 +780,7 @@ const CanvasPDFViewer = () => {
   };
 
   const handleOnKeyHove = (coord, index) => {
+    setIsHovered(index);
     const adjustedX = coord.x * scale;
     const adjustedY = coord.y * scale;
     const adjustedHeight = coord.height * scale;
@@ -434,9 +788,7 @@ const CanvasPDFViewer = () => {
   };
 
   const handleChange = (selected) => {
-    console.log(selected);
     const value = selected.target.value;
-    console.log("Selected value:", value);
     setSelectedKey(value);
   };
 
@@ -444,9 +796,32 @@ const CanvasPDFViewer = () => {
     const file = event.target.files[0];
     if (file && file.type === "application/pdf") {
       const fileUrl = URL.createObjectURL(file);
-      console.log("fileUrl : ", fileUrl);
       setPdfFile(fileUrl);
     }
+  };
+
+  const handleDeletebutton = (selectedCoordIndex) => {
+    setSelectedCoordinate((prev) =>
+      prev.map((coord, i) => {
+        if (i === selectedCoordIndex) {
+          return {
+            ...coord,
+            text: "",
+            x: 0,
+            y: 0,
+            page: coord.page,
+            width: 0,
+            height: 0,
+            isConfirm: "N",
+          };
+        }
+        return coord;
+      })
+    );
+
+    // setSelectedCoordinate(
+    //   (prev) => prev.filter((_, i) => i !== selectedCoordIndex)
+    // );
   };
 
   return (
@@ -545,25 +920,26 @@ const CanvasPDFViewer = () => {
           >
             <h3>Selected Key-Value Pairs</h3>
             {selectedCoordinate.map((coord, index) => {
+              // State to manage hover effect for each row
+
               return (
                 <>
-                  {coord.isConfirm != "P" && (
+                  {coord.isConfirm !== "P" && (
                     <>
                       <div
                         key={index}
                         style={{
                           display: "flex",
-                          justifyContent: "flex-start",
+                          justifyContent: "space-between",
                           flexDirection: "row",
                           gap: "20px",
                           padding: "10px 0",
                           borderBottom: "1px solid #ddd",
                           cursor: "pointer",
+                          position: "relative", // Add relative position for hover effect
                         }}
-                        onMouseEnter={(e) => {
-                          handleOnKeyHove(coord, index);
-                        }}
-                        onMouseLeave={() => handleHoverLeave()} // Reset on hover leave
+                        onMouseEnter={() => handleOnKeyHove(coord, index)} // Set hover state
+                        onMouseLeave={() => handleHoverLeave()} // Reset hover state
                       >
                         {/* Left align key */}
                         <div
@@ -580,10 +956,63 @@ const CanvasPDFViewer = () => {
                         <div
                           style={{
                             textAlign: "left",
-                            // color: isKeyMatched ? "red" : "black",
+                            width: "200px",
                           }}
                         >
                           {coord.text}
+                        </div>
+
+                        <div>
+                          {coord.text && (
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "end",
+                                gap: "10px",
+                                textAlign: "center",
+                                justifyContent: "center",
+                                alignItems: "center",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  fontSize: "20px",
+                                  opacity: isHovered === index ? 1 : 0,
+                                  transition: "opacity 0.3s ease",
+                                }}
+                                onClick={(e) => {
+                                  console.log(coord, index);
+                                  const updatedCoordinates =
+                                    selectedCoordinate.map((coordinate, i) => {
+                                      if (i == index) {
+                                        return {
+                                          ...coordinate,
+                                          isConfirm: "Y",
+                                        };
+                                      }
+                                      return coordinate;
+                                    });
+
+                                  setSelectedCoordinate(updatedCoordinates);
+                                  setRowData({ isVisible: false });
+                                }}
+                              >
+                                &#x2713;
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: "25px",
+                                  opacity: isHovered === index ? 1 : 0,
+                                  transition: "opacity 0.3s ease",
+                                }}
+                                onClick={() => {
+                                  handleDeletebutton(index);
+                                }}
+                              >
+                                &#x10102;
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </>
@@ -591,19 +1020,6 @@ const CanvasPDFViewer = () => {
                 </>
               );
             })}
-            {/* <ul>
-          {selectedCoordinate.map((coord, index) => (
-            <li
-              key={index}
-              onMouseEnter={(e) => {
-                handleOnKeyHove(coord, index);
-              }}
-              style={{ cursor: "pointer" }}
-            >
-              <strong>{coord.key}:</strong> {coord.text}
-            </li>
-          ))}
-        </ul> */}
           </div>
 
           {rowData && rowData.isVisible && (
@@ -640,24 +1056,34 @@ const CanvasPDFViewer = () => {
                   <button
                     value={"Confirm"}
                     onClick={() => {
-                      console.log("selectedKey : ",selectedKey)
-                      const updatedCoordinates = selectedCoordinate.map(
-                        (coordinate, i) => {
+                      console.log("selectedKey : ", selectedKey);
+                      if (!selectedKey) {
+                        return alert("Please select key");
+                      }
+                      if (!selectedText) {
+                        return alert("Value can not be blank");
+                      }
+                      const updatedCoordinates = selectedCoordinate
+                        .filter((_, i) => i !== rowData.index) // Filter out the element where i equals rowData.index
+                        .map((coordinate) => {
                           if (coordinate.key == selectedKey) {
-                            console.log("coordinate.key : ",coordinate.key)
+                            console.log("coordinate.key : ", rowData);
                             return {
-                              ...coordinate,
+                              height: rowData.height / scale,
+                              page: rowData.page,
+                              width: rowData.width / scale,
+                              x: rowData.x / scale,
+                              y: rowData.y / scale,
                               isConfirm: "Y",
                               key: selectedKey,
-                              text:selectedText
+                              text: selectedText,
                             };
                           }
                           return coordinate;
-                        }
-                      );
+                        });
 
                       // Set the updated coordinates in state
-                      console.log("updatedCoordinates : ",updatedCoordinates)
+                      console.log("updatedCoordinates : ", updatedCoordinates);
                       setSelectedCoordinate(updatedCoordinates);
                       setRowData({ isVisible: false });
                       // console.log(rowData.x);
@@ -668,6 +1094,11 @@ const CanvasPDFViewer = () => {
                   <button
                     value={"Remove"}
                     onClick={() => {
+                      const updatedCoordinates = selectedCoordinate.filter(
+                        (_, i) => i !== rowData.index
+                      );
+
+                      setSelectedCoordinate(updatedCoordinates);
                       setRowData({ isVisible: false });
                     }}
                   >
