@@ -640,13 +640,16 @@ const CanvasPDFViewer = () => {
                   <button
                     value={"Confirm"}
                     onClick={() => {
+                      console.log("selectedKey : ",selectedKey)
                       const updatedCoordinates = selectedCoordinate.map(
                         (coordinate, i) => {
                           if (coordinate.key == selectedKey) {
+                            console.log("coordinate.key : ",coordinate.key)
                             return {
                               ...coordinate,
                               isConfirm: "Y",
                               key: selectedKey,
+                              text:selectedText
                             };
                           }
                           return coordinate;
@@ -654,9 +657,10 @@ const CanvasPDFViewer = () => {
                       );
 
                       // Set the updated coordinates in state
+                      console.log("updatedCoordinates : ",updatedCoordinates)
                       setSelectedCoordinate(updatedCoordinates);
                       setRowData({ isVisible: false });
-                      console.log(rowData.x);
+                      // console.log(rowData.x);
                     }}
                   >
                     Confirm
