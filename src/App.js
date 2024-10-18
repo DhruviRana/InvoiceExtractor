@@ -504,29 +504,114 @@ const CanvasPDFViewer = () => {
   const [selectedHovered, setselectedHovered] = useState(null);
   const [rowData, setRowData] = useState({ isVisible: false });
   const [hoveredIndex, setHoveredIndex] = useState(null); // New state to track hovered index
+  // const [base64PDF, setBase64PDF] = useState("");
+  const [base64PDF, setBase64PDF] = useState("");
+
+  // useEffect(() => {
+  //   const loadPDF = async () => {
+  //     const loadingTask = pdfjsLib.getDocument(pdfFile);
+  //     const pdf = await loadingTask.promise;
+  //     const pages = [];
+  //     for (let i = 1; i <= pdf.numPages; i++) {
+  //       const page = await pdf.getPage(i);
+  //       pages.push(page); // Push each page into the pages array
+  //     }
+  //     console.log("pdfFile : ", pdfFile);
+  //     console.log("Pages : ", pages);
+  //     setPdfPages(pages); // Set all the pages into the state
+  //   };
+  //   if (pdfFile) {
+  //     loadPDF();
+  //   }
+  // }, [pdfFile]);
+
+  const loadPDF = async (pdfData) => {
+    // Load the PDF from Base64 data
+    console.log("pdfData : ", pdfData);
+    const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+    const pdf = await loadingTask.promise;
+    const pages = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      pages.push(page); // Push each page into the pages array
+    }
+    console.log("Pages ===>: ", pages);
+    setPdfFile(pages);
+    setPdfPages(pages); // Set all the pages into the state
+  };
 
   useEffect(() => {
-    const loadPDF = async () => {
-      const loadingTask = pdfjsLib.getDocument(pdfFile);
-      const pdf = await loadingTask.promise;
-      const pages = [];
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        pages.push(page); // Push each page into the pages array
-      }
-      setPdfPages(pages); // Set all the pages into the state
-    };
-    if (pdfFile) {
-      loadPDF();
+    // Check if Base64 PDF exists in localStorage on page reload
+    const storedBase64 = localStorage.getItem("pdfBase64");
+    if (storedBase64) {
+      console.log("storedBase64 : ", storedBase64);
+      setBase64PDF(storedBase64);
+      loadPDF(atob(storedBase64)); // Decode Base64 and load the PDF
     }
-  }, [pdfFile]);
+  }, []);
+
+  const handlePdfUpload = (event) => {
+    const file = event.target.files[0];
+    setPdfFile(file); // Set the selected PDF file
+
+    // Convert the PDF to Base64
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result.split(",")[1]; // Remove the data URL prefix
+      setBase64PDF(base64String);
+      localStorage.setItem("pdfBase64", base64String); // Store the Base64 string in localStorage
+      loadPDF(atob(base64String)); // Decode and load PDF pages from the uploaded file
+    };
+    reader.readAsDataURL(file); // Read the file as Base64
+  };
+
+  // const renderPage = async (page, index) => {
+  //   if (renderingTasks[index]) {
+  //     renderingTasks[index].cancel();
+  //   }
+
+  //   const canvas = document.getElementById(`pdf-canvas-${index}`);
+  //   const context = canvas.getContext("2d");
+  //   const viewport = page.getViewport({ scale });
+
+  //   canvas.width = viewport.width;
+  //   canvas.height = viewport.height;
+
+  //   const renderTask = page.render({
+  //     canvasContext: context,
+  //     viewport: viewport,
+  //   });
+
+  //   setRenderingTasks((prev) => ({ ...prev, [index]: renderTask }));
+
+  // try {
+  //   await renderTask.promise;
+  //   drawHighlights(context, viewport, index);
+  // } catch (error) {
+  //   console.error("Render error:", error);
+  // } finally {
+  //   setRenderingTasks((prev) => {
+  //     const updatedTasks = { ...prev };
+  //     delete updatedTasks[index];
+  //     return updatedTasks;
+  //   });
+  // }
+  // };
 
   const renderPage = async (page, index) => {
+    // Cancel any previous rendering tasks for this page
     if (renderingTasks[index]) {
       renderingTasks[index].cancel();
     }
 
     const canvas = document.getElementById(`pdf-canvas-${index}`);
+
+    // Add a check to ensure the canvas element exists
+    if (!canvas) {
+      console.error(`Canvas with id pdf-canvas-${index} not found`);
+      return;
+    }
+
     const context = canvas.getContext("2d");
     const viewport = page.getViewport({ scale });
 
@@ -538,7 +623,10 @@ const CanvasPDFViewer = () => {
       viewport: viewport,
     });
 
-    setRenderingTasks((prev) => ({ ...prev, [index]: renderTask }));
+    // Store the render task to allow cancellation if needed
+    renderingTasks[index] = renderTask;
+
+    // await renderTask.promise;
 
     try {
       await renderTask.promise;
@@ -621,6 +709,7 @@ const CanvasPDFViewer = () => {
       });
     }
   }, [pdfPages, selectedCoordinate, hoveredIndex]);
+  // }, [pdfPages, selectedCoordinate, hoveredIndex]);
 
   const handleMouseDown = (e, pageIndex) => {
     const canvas = document.getElementById(`pdf-canvas-${pageIndex}`);
@@ -792,13 +881,13 @@ const CanvasPDFViewer = () => {
     setSelectedKey(value);
   };
 
-  const handlePdfUpload = async (event) => {
-    const file = event.target.files[0];
-    if (file && file.type === "application/pdf") {
-      const fileUrl = URL.createObjectURL(file);
-      setPdfFile(fileUrl);
-    }
-  };
+  // const handlePdfUpload = async (event) => {
+  //   const file = event.target.files[0];
+  //   if (file && file.type === "application/pdf") {
+  //     const fileUrl = URL.createObjectURL(file);
+  //     setPdfFile(fileUrl);
+  //   }
+  // };
 
   const handleDeletebutton = (selectedCoordIndex) => {
     setSelectedCoordinate((prev) =>
@@ -836,6 +925,7 @@ const CanvasPDFViewer = () => {
                   position: "relative",
                 }}
               >
+                {console.log("ClgData : ", index)}
                 <canvas
                   id={`pdf-canvas-${index}`}
                   ref={index === 0 ? canvasRef : null}
